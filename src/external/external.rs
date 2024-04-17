@@ -1,3 +1,4 @@
+use log::*;
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -62,14 +63,14 @@ impl ExternalApi for ExternalApiService {
             .await
             .unwrap();
 
-        println!("response = {response:?}");
-        println!("status: {}", response.status());
         if response.status() == StatusCode::UNAUTHORIZED {
             error!("response status: {}", response.status());
             drop(bearer_token); // Release the lock before refreshing token
             self.refresh_access_token().await?;
             return self.get_info_api().await; // Retry the request
         }
+        info!("response = {response:?}");
+        info!("status: {}", response.status());
 
         Ok("info".to_string())
     }
