@@ -65,6 +65,7 @@ app.post('/login', (req, res) => {
 
 app.get('/protected', authenticateToken, (req, res) => {
     // Example response that returns user data
+    console.log('accessing protected route')
     res.json({ message: 'Welcome to the protected route!', user: req.user });
 });
 
@@ -75,6 +76,7 @@ app.post('/refresh-access-token',
         const accessToken = jwt.sign({ username: user.username }, ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
         const refreshToken = jwt.sign({ user: user.username }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
+        console.log('new refresh token generated');
         res.json({
             accessToken,
             refreshToken
