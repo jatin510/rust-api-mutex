@@ -2,6 +2,7 @@ use log::*;
 use std::net::SocketAddr;
 
 mod app;
+mod external;
 mod settings;
 
 use settings::SETTINGS;
