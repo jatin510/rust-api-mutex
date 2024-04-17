@@ -1,5 +1,7 @@
 use axum::{routing::get, Router};
 
+use crate::external::{external::ExternalApiService, ExternalApi};
+
 pub async fn create_app() -> Router {
     let router = Router::new()
         // get info api
@@ -9,5 +11,14 @@ pub async fn create_app() -> Router {
 }
 
 async fn get_info() -> &'static str {
-    "Hello, World!"
+    // TODO
+    // api call
+    let api_service = ExternalApiService::new();
+
+    let m = match api_service.get_info_api().await {
+        Ok(info) => info,
+        Err(e) => format!("Error: {}", e),
+    };
+
+    "dfsdf"
 }

@@ -19,12 +19,12 @@ impl ExternalApiService {
 
 #[async_trait]
 impl ExternalApi for ExternalApiService {
-    async fn get_new_access_token_api() -> Result<String, String> {
+    async fn get_new_access_token_api(&self) -> Result<String, String> {
         // Implementation here
         Ok("access_token".to_string())
     }
 
-    async fn get_info_api() -> Result<String, String> {
+    async fn get_info_api(&self) -> Result<String, String> {
         // Implementation here
 
         let response = reqwest::get("https://www.rust-lang.org")
