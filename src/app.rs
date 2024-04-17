@@ -13,9 +13,9 @@ pub async fn create_app() -> Router {
 async fn get_info() -> &'static str {
     // TODO
     // api call
-    let api_service = ExternalApiService::new();
+    let api_service = ExternalApiService::get_instance();
 
-    let m = match api_service.get_info_api().await {
+    let m = match api_service.lock().await.get_info_api().await {
         Ok(info) => info,
         Err(e) => format!("Error: {}", e),
     };

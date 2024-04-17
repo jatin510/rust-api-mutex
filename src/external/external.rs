@@ -1,4 +1,8 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
+use lazy_static::lazy_static;
+use log::error;
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 use reqwest::{Client, StatusCode};
 use tokio::sync::Mutex;
@@ -10,6 +14,11 @@ pub struct ExternalApiService {
     refresh_token: Mutex<String>,
 }
 
+lazy_static! {
+    static ref INSTANCE: Arc<Mutex<ExternalApiService>> =
+        Arc::new(Mutex::new(ExternalApiService::new()));
+}
+
 impl ExternalApiService {
     pub fn new() -> Self {
         let access_token: &str = "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MTMzNTA3ODIsImV4cCI6MTcxMzQzNzE4Mn0.cQc4t5FCz5QOKIH0Pim5fymqnnYcLt4oUZso_jp9OM0";
@@ -19,6 +28,10 @@ impl ExternalApiService {
             access_token: Mutex::new(access_token.to_string()),
             refresh_token: Mutex::new(refresh_token.to_string()),
         }
+    }
+
+    pub fn get_instance() -> Arc<Mutex<ExternalApiService>> {
+        INSTANCE.clone()
     }
 }
 
@@ -52,10 +65,7 @@ impl ExternalApi for ExternalApiService {
         println!("response = {response:?}");
         println!("status: {}", response.status());
         if response.status() == StatusCode::UNAUTHORIZED {
-            // spawn a new thread
-            // println!("creating new thread");
-
-            // thread::spawn(move || self.get_new_access_token_api());
+            error!("response status: {}", response.status());
             drop(bearer_token); // Release the lock before refreshing token
             self.refresh_access_token().await?;
             return self.get_info_api().await; // Retry the request
