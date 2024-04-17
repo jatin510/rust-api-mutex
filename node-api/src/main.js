@@ -50,7 +50,7 @@ app.post('/login', (req, res) => {
     // For demonstration, let's assume the credentials are valid
     if (username === 'user' && password === 'pass') {
         // Normally, tokens would be generated using a library like jsonwebtoken
-        const accessToken = jwt.sign({ user: username }, ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
+        const accessToken = jwt.sign({ user: username }, ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
         const refreshToken = jwt.sign({ user: username }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
         // Send the tokens as a response
@@ -73,7 +73,7 @@ app.post('/refresh-access-token',
     verifyRefreshToken,
     (req, res) => {
         const { user } = req;
-        const accessToken = jwt.sign({ username: user.username }, ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
+        const accessToken = jwt.sign({ username: user.username }, ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
         const refreshToken = jwt.sign({ user: user.username }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
         console.log('new refresh token generated');
