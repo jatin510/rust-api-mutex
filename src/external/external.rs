@@ -6,18 +6,18 @@ use lazy_static::lazy_static;
 use log::error;
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 use reqwest::{Client, StatusCode};
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 
 use super::ExternalApi;
 
 pub struct ExternalApiService {
-    access_token: Mutex<String>,
-    refresh_token: Mutex<String>,
+    access_token: RwLock<String>,
+    refresh_token: RwLock<String>,
 }
 
 lazy_static! {
-    static ref INSTANCE: Arc<Mutex<ExternalApiService>> =
-        Arc::new(Mutex::new(ExternalApiService::new()));
+    static ref INSTANCE: Arc<RwLock<ExternalApiService>> =
+        Arc::new(RwLock::new(ExternalApiService::new()));
 }
 
 impl ExternalApiService {
@@ -26,12 +26,12 @@ impl ExternalApiService {
         let refresh_token :&str= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MTMzNTA0NDUsImV4cCI6MTcxMzk1NTI0NX0.p--jjgKMKS6JbSW331-aghsnQCDvLaovZmunTrz9DbA";
 
         ExternalApiService {
-            access_token: Mutex::new(access_token.to_string()),
-            refresh_token: Mutex::new(refresh_token.to_string()),
+            access_token: RwLock::new(access_token.to_string()),
+            refresh_token: RwLock::new(refresh_token.to_string()),
         }
     }
 
-    pub fn get_instance() -> Arc<Mutex<ExternalApiService>> {
+    pub fn get_instance() -> Arc<RwLock<ExternalApiService>> {
         INSTANCE.clone()
     }
 }
@@ -48,7 +48,7 @@ impl ExternalApi for ExternalApiService {
         let client = Client::new();
 
         // Create the value for the Authorization header
-        let bearer_token = self.access_token.lock().await.clone();
+        let bearer_token = self.access_token.read().await;
         let auth_value = format!("Bearer {}", bearer_token);
 
         // Create a HeaderMap and insert the Authorization header
@@ -81,7 +81,7 @@ impl ExternalApi for ExternalApiService {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert("Content-Type", "application/json".parse().unwrap());
 
-        let refresh_token = self.refresh_token.lock().await.clone();
+        let refresh_token = self.refresh_token.read().await.clone();
 
         let data = format!(
             r#"{{
@@ -116,8 +116,8 @@ impl ExternalApi for ExternalApiService {
     }
 
     async fn update_tokens(&self, new_access_token: String, new_refresh_token: String) {
-        let mut access_token_guard = self.access_token.lock().await;
-        let mut refresh_token_guard = self.refresh_token.lock().await;
+        let mut access_token_guard = self.access_token.write().await;
+        let mut refresh_token_guard = self.refresh_token.write().await;
 
         *access_token_guard = new_access_token;
         *refresh_token_guard = new_refresh_token;

@@ -15,7 +15,7 @@ async fn get_info() -> &'static str {
     // api call
     let api_service = ExternalApiService::get_instance();
 
-    let m = match api_service.lock().await.get_info_api().await {
+    let m = match api_service.read().await.get_info_api().await {
         Ok(info) => info,
         Err(e) => format!("Error: {}", e),
     };
